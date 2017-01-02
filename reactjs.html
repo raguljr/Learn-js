@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>My First React Example</title>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script src="https://fb.me/react-15.0.0.js"></script>
+    <script src="https://fb.me/react-dom-15.0.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+    <script type="text/babel">
+
+    class App extends React.Component{
+      constructor(props){
+        super(props);
+        this.state={
+          sname:'',
+          semail:'',
+          sphone:'',
+          sdate:'',
+          tables:[],
+          editing:false,
+          del: false,
+          splIndex: 0
+        }
+        this.process=this.process.bind(this);
+        this.update=this.update.bind(this);
+        this.remo=this.remo.bind(this);
+        this.sortDate=this.sortDate.bind(this);
+        this.editf=this.editf.bind(this);
+        this.save=this.save.bind(this);
+        this.cancel=this.cancel.bind(this);
+      }
+
+      process(e){
+          var newtable=this.state.tables; 
+          newtable.push({name:this.state.sname,email:this.state.semail,phone:this.state.sphone,date:this.state.sdate});
+          this.setState({tables:newtable});
+          console.log(this.state.tables);
+          
+
+          this.setState({sname:""});
+          this.setState({semail:""});
+          this.setState({sphone:""});
+          this.setState({sdate:""});
+          e.preventDefault();
+        }
+
+        update(e){
+          this.setState({ [e.target.name] :e.target.value});
+        }
+
+        remo(num){ 
+        this.setState({del:true});
+        this.state.tables.splice(num, 1);
+        this.setState({tables:this.state.tables});
+        this.setState({sname:""});
+          this.setState({semail:""});
+          this.setState({sphone:""});
+          this.setState({sdate:""});
+          console.log("table",this.state.tables);
+          }
+
+      sortDate(){
+          
+          var ctable=this.state.tables;
+          var fitable=ctable;
+          var newArr=[];
+          for(var i=0;i<ctable.length;i++){
+            newArr.push(ctable[i].date);
+          }
+          newArr.sort();
+          console.log(newArr);
+
+          var nArr=[];
+          for(var i=0;i<newArr.length;i++){
+            for(var j=0;j<ctable.length;j++){
+              if(newArr[i]==ctable[j].date){
+                nArr.push(j);
+                break;
+              }
+            }
+          }
+         
+    console.log(nArr);
+          
+          for(var ii=0;ii<nArr.length;ii++){
+            fitable.push(ctable[nArr[ii]]);
+          }
+          
+         fitable.splice(0,fitable.length/2);
+         ctable=fitable;
+         fitable=ctable;
+        
+          this.setState({tables:fitable});
+
+          if(this.state.editing){
+            this.setState({sname:''}); 
+          this.setState({semail:''}); 
+          this.setState({sphone:''}); 
+          this.setState({sdate:''}); 
+          }
+
+        }
+
+        editf(ind){
+          this.setState({editing:true});
+          this.setState({del:false});
+          console.log(this.state.tables);
+          this.setState({sname:this.state.tables[ind].name}); 
+          this.setState({semail:this.state.tables[ind].email}); 
+          this.setState({sphone:this.state.tables[ind].phone}); 
+          this.setState({sdate:this.state.tables[ind].date}); 
+          this.state.splIndex=ind;
+          
+        }
+
+        save(){
+          this.setState({editing:false});
+          
+          var newIndex=this.state.splIndex;
+
+          this.state.tables[newIndex].name=this.state.sname;
+          this.state.tables[newIndex].email=this.state.semail;
+          this.state.tables[newIndex].phone=this.state.sphone;
+          this.state.tables[newIndex].date=this.state.sdate;
+
+          this.setState({sname:""});
+          this.setState({semail:""});
+          this.setState({sphone:""});
+          this.setState({sdate:""});
+
+
+
+          console.log(this.state.tables);
+
+        }
+
+        cancel(){
+          this.setState({editing:false});
+          this.setState({sname:""});
+          this.setState({semail:""});
+          this.setState({sphone:""});
+          this.setState({sdate:""});
+           console.log(this.state.tables);
+
+        }
+
+      render(){
+        if(this.state.editing){
+        var btnChange =<div> <button onClick={this.save}>Update</button><button onClick={this.cancel}>Cancel</button></div>
+        var btnDel = "";
+        }
+        else{
+        var btnChange = <input type="submit" value="Submit" />
+        var btnDel = <button onClick={()=>this.remo(index)}>Delete</button>
+        }
+        
+        if(this.state.del){
+        var btnChange =<input type="submit" value="Submit" /> ;
+        var btnDel = "";
+        }
+
+      return (
+        <div>
+            <form onSubmit={this.process}>
+              <input type="text" ref="uname" name="sname" placeholder="Name"  value={this.state.sname} onChange={this.update} required="required"  /><br/>
+              <input type="email" ref="email" name="semail" placeholder="Email" value={this.state.semail} onChange={this.update} required="required"/><br/>
+              <input type="text" ref="phone" name="sphone" placeholder="Phone" value={this.state.sphone} onChange={this.update} required="required"/><br/>
+              <input type="date" ref="datev" name="sdate" placeholder="Date" value={this.state.sdate} onChange={this.update} required="required"/><br/>
+              {btnChange}
+            </form>
+
+            <table>
+            <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th onClick={this.sortDate}>Date</th>
+            </tr>  
+            </thead>
+            <tbody>
+             { 
+
+               this.state.tables.map(function(tableRow, index) {
+                  return (
+                    <tr key={'row' + index} id={index}>
+                      <td>{tableRow.name}</td>   
+                      <td>{tableRow.email}</td>
+                       <td>{tableRow.phone}</td>
+                       <td>{tableRow.date}</td>
+                       <td><button onClick={()=>this.editf(index)}>Edit</button></td>
+                       <td><button onClick={()=>this.remo(index)}>Delete</button> </td> 
+                    </tr>
+                    );
+                },this)            
+              }
+            </tbody>
+          </table>
+
+            </div>
+        );
+      }
+
+    }
+
+    ReactDOM.render(<App/>,document.getElementById('app'));
+
+    </script>
+  </body>
+</html>
